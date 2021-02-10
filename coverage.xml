@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1612971263">
+  <project timestamp="1612971263">
+    <package name="PinkCrab\Nonce">
+      <file name="/shared/httpd/php/htdocs/pc_modules/Nonce/src/Nonce.php">
+        <class name="PinkCrab\Nonce\Nonce" namespace="PinkCrab\Nonce">
+          <metrics complexity="7" methods="6" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="8" coveredstatements="8" elements="14" coveredelements="14"/>
+        </class>
+        <line num="43" type="method" name="__construct" visibility="public" complexity="1" crap="1" count="7"/>
+        <line num="44" type="stmt" count="7"/>
+        <line num="45" type="stmt" count="7"/>
+        <line num="46" type="stmt" count="7"/>
+        <line num="55" type="method" name="as_url" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="56" type="stmt" count="1"/>
+        <line num="64" type="method" name="token" visibility="public" complexity="1" crap="1" count="6"/>
+        <line num="65" type="stmt" count="6"/>
+        <line num="75" type="method" name="nonce_field" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="76" type="stmt" count="1"/>
+        <line num="85" type="method" name="validate" visibility="public" complexity="1" crap="1" count="1"/>
+        <line num="86" type="stmt" count="1"/>
+        <line num="95" type="method" name="admin_referer" visibility="public" complexity="2" crap="2" count="1"/>
+        <line num="96" type="stmt" count="1"/>
+        <metrics loc="98" ncloc="38" classes="1" methods="6" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="8" coveredstatements="8" elements="14" coveredelements="14"/>
+      </file>
+    </package>
+    <metrics files="1" loc="98" ncloc="38" classes="1" methods="6" coveredmethods="6" conditionals="0" coveredconditionals="0" statements="8" coveredstatements="8" elements="14" coveredelements="14"/>
+  </project>
+</coverage>
