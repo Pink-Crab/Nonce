@@ -2,14 +2,16 @@
 
 Simple class based WP Nonce solution  
 
-![alt text](https://img.shields.io/badge/Current_Version-1.0.0-green.svg?style=flat " ")
-
+![alt text](https://img.shields.io/badge/Current_Version-0.1.0-yellow.svg?style=flat " ") 
 [![Open Source Love](https://badges.frapsoft.com/os/mit/mit.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
 
-![alt text](https://img.shields.io/badge/PHPStan-level%208-brightgreen.svg?style=flat " ")
+![](https://github.com/Pink-Crab/Nonce/workflows/GitHub_CI/badge.svg " ")
+[![codecov](https://codecov.io/gh/Pink-Crab/Nonce/branch/master/graph/badge.svg?token=R3SB4WDL8Z)](https://codecov.io/gh/Pink-Crab/Nonce)
 
-![alt text](https://img.shields.io/badge/PHPUnit-PASSING-brightgreen.svg?style=flat " ")
 
+
+For more details please visit our docs.
+https://app.gitbook.com/@glynn-quelch/s/pinkcrab/
  
 
 ## Version ##
@@ -17,11 +19,12 @@ Simple class based WP Nonce solution
 **Release 0.1.0**
 
 ## Why? ##
+Allows for use of Nonces in an oop mannor, while allowing serialisation/deserialsation of the object.
 
 ## Setup ##
 
 ```bash 
-$ composer require pinkcrab/nonce
+$ composer require pinkcrab/wp-nonce
 
 ``` 
 
