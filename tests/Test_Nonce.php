@@ -14,8 +14,7 @@ declare(strict_types=1);
 namespace PinkCrab\Nonce\Tests;
 
 use PinkCrab\Nonce\Nonce;
-use PinkCrab\PHPUnit_Helpers\Output;
-use PinkCrab\PHPUnit_Helpers\Reflection;
+use Gin0115\WPUnit_Helpers\Objects;
 
 class Test_Nonce extends \WP_UnitTestCase {
 
@@ -24,8 +23,8 @@ class Test_Nonce extends \WP_UnitTestCase {
 		$this->assertInstanceOf( Nonce::class, $nonce );
 
 		// Ensure the properties are set.
-		$this->assertEquals( 'test', Reflection::get_private_property( $nonce, 'action' ) );
-		$this->assertNotEmpty( Reflection::get_private_property( $nonce, 'nonce_token' ) );
+		$this->assertEquals( 'test', Objects::get_property( $nonce, 'action' ) );
+		$this->assertNotEmpty( Objects::get_property( $nonce, 'nonce_token' ) );
 	}
 
 	/**
