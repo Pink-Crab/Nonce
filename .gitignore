@@ -1,5 +1,8 @@
 vendor
 composer.lock
-coverage.xmll
+coverage.xml
 coverage-report
+clover.xml
+.phpunit.result.cache
 wordpress
+.vscode

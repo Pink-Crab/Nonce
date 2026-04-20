@@ -1,131 +1,186 @@
 # Nonce
 
-Simple class based WP Nonce solution  
+A minimal object-based wrapper around the WordPress Nonce API. Each `Nonce` instance holds an action and a lazily-generated token, and exposes helpers for URL decoration, form-field rendering, validation, and admin-referer checks. Instances are serialisable so you can pass them through the request lifecycle without regenerating the token.
 
-![alt text](https://img.shields.io/badge/Current_Version-0.1.0-yellow.svg?style=flat " ") 
-[![Open Source Love](https://badges.frapsoft.com/os/mit/mit.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
+[![Latest Stable Version](https://poser.pugx.org/pinkcrab/wp-nonce/v)](https://packagist.org/packages/pinkcrab/wp-nonce)
+[![Total Downloads](https://poser.pugx.org/pinkcrab/wp-nonce/downloads)](https://packagist.org/packages/pinkcrab/wp-nonce)
+[![License](https://poser.pugx.org/pinkcrab/wp-nonce/license)](https://packagist.org/packages/pinkcrab/wp-nonce)
+[![PHP Version Require](https://poser.pugx.org/pinkcrab/wp-nonce/require/php)](https://packagist.org/packages/pinkcrab/wp-nonce)
+![GitHub contributors](https://img.shields.io/github/contributors/Pink-Crab/Nonce?label=Contributors)
+![GitHub issues](https://img.shields.io/github/issues-raw/Pink-Crab/Nonce)
 
-![](https://github.com/Pink-Crab/Nonce/workflows/GitHub_CI/badge.svg " ")
+[![WP 6.6 [PHP8.0-8.4] Tests](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_6.yaml/badge.svg)](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_6.yaml)
+[![WP 6.7 [PHP8.0-8.4] Tests](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_7.yaml/badge.svg)](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_7.yaml)
+[![WP 6.8 [PHP8.0-8.4] Tests](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_8.yaml/badge.svg)](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_8.yaml)
+[![WP 6.9 [PHP8.0-8.4] Tests](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_9.yaml/badge.svg)](https://github.com/Pink-Crab/Nonce/actions/workflows/WP_6_9.yaml)
+
 [![codecov](https://codecov.io/gh/Pink-Crab/Nonce/branch/master/graph/badge.svg?token=R3SB4WDL8Z)](https://codecov.io/gh/Pink-Crab/Nonce)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Pink-Crab/Nonce/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Pink-Crab/Nonce/?branch=master)
 
+For more details please visit the docs site: https://perique.info/lib/WP_Nonce.html
 
+## Why?
 
-For more details please visit our docs.
-https://app.gitbook.com/@glynn-quelch/s/pinkcrab/
- 
+WordPress's native nonce API is procedural — `wp_create_nonce()`, `wp_verify_nonce()`, `wp_nonce_field()`, `check_admin_referer()` — and leaves the caller to juggle the action handle alongside the token at every touch-point. In practice nonces are a single unit: one action string, one token, one lifecycle. This library wraps that unit in a small class so it can be passed around, serialised, and stored alongside whatever else needs the nonce (a form model, an AJAX endpoint spec, a REST request builder).
 
-## Version ##
+## Install
 
-**Release 0.1.0**
+```bash
+composer require pinkcrab/wp-nonce
+```
 
-## Why? ##
-Allows for use of Nonces in an oop mannor, while allowing serialisation/deserialsation of the object.
-
-## Setup ##
-
-```bash 
-$ composer require pinkcrab/wp-nonce
-
-``` 
+Then include the Composer autoloader in your project:
 
 ```php
-    $nonce = new Nonce('my_none_key');
-
-    // To get the current nonce token
-    $nonce->token();
-    
-    // To validate
-    $nonce->validate($_POST['nonce']); // true/false
-
-    // To add to url
-    $url = $nonce->as_url('http://www.url.com', 'my_nonce'); // http://www.url.com?my_nonce={nonce_value}
-
-    // Validate url.
-    $nonce->admin_referer('my_nonce'); // true/false if set in url.
+require_once __DIR__ . '/vendor/autoload.php';
 ```
 
-# Methods
+## Usage
 
-## Create Instance
+```php
+use PinkCrab\Nonce\Nonce;
 
-``` php
+$nonce = new Nonce( 'my_action' );
 
-// Create with a custom key
-$custom_nonce = new Nonce('custom_key');
+// Get the current token.
+$nonce->token();
 
+// Render a <input type="hidden"> nonce field.
+echo $nonce->nonce_field();
+
+// Validate a submitted token.
+if ( ! $nonce->validate( $_POST['_wpnonce'] ?? '' ) ) {
+    wp_die( 'Invalid nonce' );
+}
+
+// Decorate a URL with the nonce token.
+$url = $nonce->as_url( 'https://example.com/admin-action' );
 ```
 
-> Once your nonce has been created, it can be serialised and/or passed around your codebase.
+## Methods (Setters)
 
-## as_url( string $url, string $arg='_wpnonce' ): string
+### __construct
+**__construct( string $action )**
+> @param string $action The action handle that scopes the nonce (same semantics as WordPress's `wp_create_nonce($action)`).
 
-``` php
+Creates a nonce instance bound to a single action handle. The token is generated lazily on first access.
 
-$nonce = new Nonce('url_key');
-
-$custom_key_in_url = $nonce->as_url('http://test.com', 'url_nonce');
-// http://test.com?url_nonce={nonce_token}
-
-$default_key_in_url = $nonce->as_url('http://test.com');
-// http://test.com?_wpnonce={nonce_token}
+*Example*
+```php
+$nonce = new Nonce( 'save_settings' );
 ```
 
-> NOTICE! This doesnt make use of the refer value found in admin nonces.
+## Methods (Getters & Helpers)
 
-## token(): string
+### token
+**token(): string**
+> @return string The nonce token string, generated via `wp_create_nonce()` the first time it's called.
 
-``` php
+Returns the nonce token. Matches what `wp_create_nonce($action)` would produce for the same action.
 
-$nonce = new Nonce('url_key');
-
-// To get the current nonce value.
-print $nonce->token(); // 31b31db189
-
-$nonce_token = nonce->token(); // 31b31db189
+*Example*
+```php
+$nonce = new Nonce( 'save_settings' );
+echo $nonce->token(); // e.g. "31b31db189"
 ```
 
-## nonce_field($name = '_wpnonce'): string
+### as_url
+**as_url( string $url, string $arg = '_wpnonce' ): string**
+> @param string $url The base URL to append the nonce to.  
+> @param string $arg Query-string parameter name the nonce is appended as. Defaults to `_wpnonce`.  
+> @return string The URL with `?<arg>=<token>` (or `&<arg>=<token>`) appended.
 
-``` php
+Appends the nonce token to a URL as a query-string parameter. Handles both URLs without an existing query string and URLs that already have one.
 
-$nonce = new Nonce('as_input');
+*Example*
+```php
+$nonce = new Nonce( 'url_action' );
 
-// Create a nonce field, with a custom id/name for input
-print $nonce->nonce_field('my_nonce'); 
-// <input type="hidden" id="my_nonce" name="my_nonce" value="{nonce_token}">
+$nonce->as_url( 'https://example.com/do' );
+// https://example.com/do?_wpnonce=<token>
 
-// Create a nonce field, with a custom id/name for input
-print $nonce->nonce_field(); 
-// <input type="hidden" id="_wpnonce_" name="_wpnonce_" value="{nonce_token}">
+$nonce->as_url( 'https://example.com/do?id=42', 'my_nonce' );
+// https://example.com/do?id=42&my_nonce=<token>
 ```
-> The nonce field is not automcatically printed
 
-## validate($name = '_wpnonce'): string
+> This does not use the admin-referer mechanism — for that use `admin_referer()` below.
 
-``` php
+### nonce_field
+**nonce_field( string $name = '_wpnonce' ): string**
+> @param string $name The input name/id used for the hidden field. Defaults to `_wpnonce`.  
+> @return string The HTML for a hidden `<input>` containing the nonce token.
 
-$nonce = new Nonce('as_input');
+Returns (does not echo) the HTML for a hidden `<input>` carrying the nonce token. Useful for form-building code that prefers to compose output itself.
 
-// Create a nonce field, with a custom id/name for input
-print $nonce->nonce_field('my_nonce'); 
-// <input type="hidden" id="my_nonce" name="my_nonce" value="{nonce_token}">
+*Example*
+```php
+$nonce = new Nonce( 'form_submit' );
 
-// Create a nonce field, with a custom id/name for input
-print $nonce->nonce_field(); 
-// <input type="hidden" id="_wpnonce_" name="_wpnonce_" value="{nonce_token}">
+echo $nonce->nonce_field( 'settings_nonce' );
+// <input type="hidden" id="settings_nonce" name="settings_nonce" value="<token>">
+
+echo $nonce->nonce_field();
+// <input type="hidden" id="_wpnonce" name="_wpnonce" value="<token>">
 ```
-> The nonce field is not automcatically printed
 
-## Dependencies ##
+> The nonce field is returned, not echoed. Call `echo` yourself.
 
-* --NONE--
+### validate
+**validate( string $nonce ): bool**
+> @param string $nonce The token string to validate against the nonce's action.  
+> @return bool `true` if the token matches; `false` otherwise.
 
-## License ##
+Validates a token string against the nonce's action. Returns `true` for a match, `false` otherwise. Wraps `wp_verify_nonce()` with a strict-bool return.
 
-### MIT License ###
+*Example*
+```php
+$nonce = new Nonce( 'my_action' );
 
-http://www.opensource.org/licenses/mit-license.html  
+$nonce->validate( $nonce->token() ); // true
+$nonce->validate( 'anything_else' ); // false
+```
 
-## Change Log ##
+### admin_referer
+**admin_referer( string $name = '_wpnonce' ): bool**
+> @param string $name The `$_REQUEST` key holding the nonce. Defaults to `_wpnonce`.  
+> @return bool `true` if the admin-referer check passes.
 
-0.1.0 - Created from part of PC Framework 0.1.0
+Runs WordPress's `check_admin_referer()` against the token found in `$_REQUEST[$name]`. Returns `true` on success; WordPress itself will `wp_die()` on failure (which in tests throws `WPDieException`).
+
+*Example*
+```php
+$nonce = new Nonce( 'admin_save' );
+
+if ( $nonce->admin_referer() ) {
+    // OK to proceed.
+}
+```
+
+## Serialisation
+
+`Nonce` implements `Serializable` (via PHP's magic methods), so instances can be stored alongside other request state and recovered later without regenerating the token:
+
+```php
+$nonce    = new Nonce( 'serialised' );
+$s_nonce  = serialize( $nonce );
+$restored = unserialize( $s_nonce );
+
+$restored->token() === $nonce->token(); // true
+```
+
+## Tested Against
+
+* PHP 8.0, 8.1, 8.2, 8.3 & 8.4
+* WP 6.6, 6.7, 6.8 & 6.9
+* MySQL 8.4
+
+## License
+
+### MIT License
+
+http://www.opensource.org/licenses/mit-license.html
+
+## Change Log
+
+* 1.0.0 - First stable release. Drop PHP 7.x, require PHP 8.0+. Modernise the tooling chain (PHPStan 2.x, PHPUnit 8|9, WPCS 3.x, `yoast/phpunit-polyfills` widened to include v4). Replace the single GitHub_CI workflow with the WP 6.6–6.9 matrix (PHP 8.0–8.4, `mysql:8.4`) using `codecov/codecov-action@v4`. Suppress the WP 6.8 `wp_is_block_theme` early-call notice in `tests/wp-config.php`. Swap the custom VCS-sourced `pinkcrab/phpunit-helpers` dev dep for the packaged `gin0115/wpunit-helpers`; migrate `Test_Nonce` accordingly (`Reflection::get_private_property` → `Objects::get_property`). Remove the `repositories` block and `object-calisthenics/phpcs-calisthenics-rules` from dev-deps. README reformatted to the shared lib template.
+* 0.1.0 - Created from part of PC Framework 0.1.0
